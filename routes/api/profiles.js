@@ -8,6 +8,8 @@ const Profile = require('../../models/Profile');
 const User = require('../../models/User');
 const c = require('config');
 const { response } = require('express');
+const normalize = require('normalize-url');
+
 
 //ANCHOR @route GET api/profile/me
 //ANCHOR Get current users peofile
@@ -32,17 +34,21 @@ router.get('/me', auth, async (req,res) => {
 //ANCHOR @route POST api/profile
 //ANCHOR Create or update user profile
 //ANCHOR Private
-router.post('/', [auth, [
-    check('status', 'Status is required').not().isEmpty(),
-    check('skills', 'Skill is required').not().isEmpty()
-
-]],
-async (req, res) => {
-    const errors = validationResult(req);
-    if(!errors.isEmpty()){
-        return res.status(400).json({ errors: errors.array()});     
-    }
-    const {
+router.post(
+    '/',
+    [
+      auth,
+      [
+        check('status', 'Status is required').not().isEmpty(),
+        check('skills', 'Skills is required').not().isEmpty()
+      ]
+    ],
+    async (req, res) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+      const {
         company,
         location,
         website,
@@ -56,48 +62,42 @@ async (req, res) => {
         linkedin,
         facebook
       } = req.body;
-//ANCHOR Build profile object 
-//NOTE before sending to database, we have to group properties as an object
-const profileFields = {};
-profileFields.user = req.user.id; //id from token (middleware)
-if(company) profileFields.company = company;
-if(website) profileFields.website = website;
-if(location) profileFields.location = location;
-if(status) profileFields.status = status;
-if(githubusername) profileFields.githubusername = githubusername;
-if(skills){
-//NOTE The trim() method removes whitespace from both ends of a string. 
-profileFields.skills = skills.split(',').map(skill => skill.trim()); //split is used to generate an Array
-}
-//ANCHOR Build social object array
-profileFields.social = {}
-if(youtube) profileFields.social.youtube = youtube;
-if(twitter) profileFields.social.twitter = twitter;
-if(instagram) profileFields.social.instagram = instagram;
-if(linkedin) profileFields.social.linkedin = linkedin;
-if(facebook) profileFields.social.facebook = facebook;
-
-try{
-    let profile = await Profile.findOne({user: req.user.id});
-    //ANCHOR Update
-    if(profile){
-        profile = await Profile.findOneAndUpdate({user: req.user.id}, { $set: profileFields}, {new: true});
-        return res.json(profile)
-    }
-    //ANCHOR Create when this user is not yet create profile
-    profile = new Profile(profileFields);
-    await profile.save(); 
-     res.json(profile)
-    
-
-}catch(err){
-    res.status(500).send('Server Error oe');
-
-}
-
-
-
-})
+   
+      const profileFields = {
+        user: req.user.id,
+        company,
+        location,
+        website: website && website !== '' ? normalize(website, { forceHttps: true }) : '',
+        bio,
+        skills: Array.isArray(skills)
+          ? skills
+          : skills.split(',').map((skill) => ' ' + skill.trim()),
+        status,
+        githubusername
+      };
+   
+      // Build social object and add to profileFields
+      const socialfields = { youtube, twitter, instagram, linkedin, facebook };
+   
+      for (const [key, value] of Object.entries(socialfields)) {
+        if (value && value.length > 0)
+          socialfields[key] = normalize(value, { forceHttps: true });
+      }
+      profileFields.social = socialfields;
+   
+      try {
+        // Using upsert option (creates new doc if no match is found):
+        let profile = await Profile.findOneAndUpdate(
+          { user: req.user.id },
+          { $set: profileFields },
+          { new: true, upsert: true, setDefaultsOnInsert: true }
+        );
+        res.json(profile);
+      } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+      }
+    })
 
 //ANCHOR @route GET api/profile
 //ANCHOR GET all profile

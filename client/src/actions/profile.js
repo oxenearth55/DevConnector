@@ -2,7 +2,8 @@ import axios from 'axios';
 import { setAlert } from './alert';
 import {
     GET_PROFILE, 
-    PROFILE_ERROR
+    PROFILE_ERROR,
+    UPDATE_PROFILE
 } from './types';
 
 //NOTE get current user profile 
@@ -62,4 +63,77 @@ export const createProfile = (formData, history, edit = false) => async dispatch
             payload: {msg: err.response.statusText, status: err.response.status}
         });          
     }
+}
+
+//NOTE Add Experience 
+export const addExperience = (formData, history) => async dispatch => {
+
+    try {
+        const config = {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+
+        //NOTE send data as an object to the backend to crate user profile 
+        const res = await axios.put('/api/profile/experience', formData, config);
+        //NOTE keep data that was returned from the backend in redux (global storage)
+        dispatch({
+            type: UPDATE_PROFILE, 
+            payload: res.data
+        });
+
+        dispatch(setAlert('Experience Added', 'success'));    
+        history.push('/dashboard'); //NOTE use history.push instead of redirect because this is not react
+        
+    } catch (err) {
+
+        const errors =err.response.data.errors;
+        if(errors){
+            errors.forEach(error => dispatch(setAlert(error.msg, 'danger'))); //NOTE errors are array from validator at the backend
+        }
+
+        dispatch({
+            type: PROFILE_ERROR, 
+            payload: {msg: err.response.statusText, status: err.response.status}
+        });          
+    }
+
+}
+
+//NOTE Add Education 
+export const addEducation = (formData, history) => async dispatch => {
+
+    try {
+        const config = {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+
+        //NOTE send data as an object to the backend to crate user profile 
+        const res = await axios.put('/api/profile/education', formData, config);
+        //NOTE keep data that was returned from the backend in redux (global storage)
+        dispatch({
+            type: UPDATE_PROFILE, 
+            payload: res.data
+        });
+
+        dispatch(setAlert('Education Added', 'success'));
+        history.push('/dashboard'); //NOTE use history.push instead of redirect because this is not react
+        
+        
+    } catch (err) {
+
+        const errors =err.response.data.errors;
+        if(errors){
+            errors.forEach(error => dispatch(setAlert(error.msg, 'danger'))); //NOTE errors are array from validator at the backend
+        }
+
+        dispatch({
+            type: PROFILE_ERROR, 
+            payload: {msg: err.response.statusText, status: err.response.status}
+        });          
+    }
+
 }
