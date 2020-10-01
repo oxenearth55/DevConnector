@@ -9,6 +9,7 @@ const User = require('../../models/User');
 const c = require('config');
 const { response } = require('express');
 const normalize = require('normalize-url');
+const Post = require('../../models/Post');
 
 
 //ANCHOR @route GET api/profile/me
@@ -148,6 +149,7 @@ router.get('/user/:user_id', async (req,res) => {
 router.delete('/',auth, async (req,res) => {
     try{
         //ANCHOR Remove users posts
+        await Post.deleteMany({ user: req.user.id });
 
         //ANCHOR Remove profile
         await Profile.findOneAndRemove({user: req.user.id});

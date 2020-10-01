@@ -1,12 +1,16 @@
 import axios from 'axios'; 
 import { setAlert } from './alert';
 import {
-    GET_PROFILE, 
+    GET_PROFILE,
+    GET_PROFILES, 
     PROFILE_ERROR,
-    UPDATE_PROFILE
+    UPDATE_PROFILE,
+    ACCOUNT_DELETE,
+    CLEAR_PROFILE,
+    GET_REPOS
 } from './types';
 
-//NOTE get current user profile 
+//ANCHOR get current user profile 
 
 export const getCurrentProfile = () => async dispatch => {
 
@@ -24,6 +28,63 @@ export const getCurrentProfile = () => async dispatch => {
         });   
     }
 };
+
+//ANCHOR get current user profile 
+
+export const getProfiles = () => async dispatch => {
+    dispatch({ type: CLEAR_PROFILE});
+
+    try {
+        const res = await axios.get('/api/profile'); 
+
+        dispatch({
+            type: GET_PROFILES, 
+            payload: res.data
+        });
+    } catch (err) {
+        dispatch({
+            type: PROFILE_ERROR, 
+            payload: {msg: err.response.statusText, status: err.response.status}
+        });   
+    }
+};
+
+//ANCHOR Get Profile by ID 
+export const getProfileById = userId => async dispatch => {
+
+    try {
+        const res = await axios.get(`/api/profile/${userId}`); 
+
+        dispatch({
+            type: GET_PROFILE, 
+            payload: res.data
+        });
+    } catch (err) {
+        dispatch({
+            type: PROFILE_ERROR, 
+            payload: {msg: err.response.statusText, status: err.response.status}
+        });   
+    }
+};
+
+//ANCHOR Get Github repos
+export const getGithubRepos = username => async dispatch => {
+
+    try {
+        const res = await axios.get(`/api/profile/github/${username}`); 
+
+        dispatch({
+            type: GET_REPOS, 
+            payload: res.data
+        });
+    } catch (err) {
+        dispatch({
+            type: PROFILE_ERROR, 
+            payload: {msg: err.response.statusText, status: err.response.status}
+        });   
+    }
+};
+
 
 //ANCHOR Create or update profile 
 //NOTE history object which has a method called push that will redirect to client side route
@@ -136,4 +197,73 @@ export const addEducation = (formData, history) => async dispatch => {
         });          
     }
 
+}
+
+//ANCHOR Delete Experience 
+
+export const deleteExperience = id => async dispatch => {
+    try {
+        const res = await axios.delete(`/api/profile/experience/${id}`);
+
+        dispatch({
+            type: UPDATE_PROFILE,
+            payload: res.data
+        });
+
+        dispatch(setAlert('Experience Removed', 'success'));
+
+    } catch (err) {
+        dispatch({
+            type: PROFILE_ERROR, 
+            payload: {msg: err.response.statusText, status: err.response.status}
+        });          
+    }
+}
+
+
+//ANCHOR Delete Education 
+
+export const deleteEducation = id => async dispatch => {
+    try {
+        const res = await axios.delete(`/api/profile/education/${id}`);
+
+        dispatch({
+            type: UPDATE_PROFILE,
+            payload: res.data
+        });
+
+        dispatch(setAlert('Education Removed', 'success'));
+
+    } catch (err) {
+        dispatch({
+            type: PROFILE_ERROR, 
+            payload: {msg: err.response.statusText, status: err.response.status}
+        });          
+    }
+}
+
+//NOTE Delete account & profile 
+
+export const deleteAccount = () => async dispatch => {
+    if(window.confirm('Are you sure? This can NOT be undone?')){
+
+        try {
+            const res = await axios.delete(`/api/profile`);
+    
+            dispatch({ type: CLEAR_PROFILE });
+            dispatch({ type: ACCOUNT_DELETE})
+    
+            dispatch(setAlert('Your account has been perminantly deleted'));
+    
+        } catch (err) {
+            dispatch({
+                type: PROFILE_ERROR, 
+                payload: {msg: err.response.statusText, status: err.response.status}
+            });          
+        }
+
+
+    }
+
+    
 }
