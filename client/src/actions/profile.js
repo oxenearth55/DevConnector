@@ -53,7 +53,7 @@ export const getProfiles = () => async dispatch => {
 export const getProfileById = userId => async dispatch => {
 
     try {
-        const res = await axios.get(`/api/profile/${userId}`); 
+        const res = await axios.get(`/api/profile/user/${userId}`); 
 
         dispatch({
             type: GET_PROFILE, 
@@ -248,7 +248,7 @@ export const deleteAccount = () => async dispatch => {
     if(window.confirm('Are you sure? This can NOT be undone?')){
 
         try {
-            const res = await axios.delete(`/api/profile`);
+            await axios.delete(`/api/profile`);
     
             dispatch({ type: CLEAR_PROFILE });
             dispatch({ type: ACCOUNT_DELETE})
