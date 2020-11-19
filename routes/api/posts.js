@@ -51,7 +51,7 @@ router.post('/',[auth,
 
 //ANCHOR @route GET api/posts
 //ANCHOR GET all posts 
-//ANCHOR Public 
+//ANCHOR Private 
 router.get('/', async (req,res) => {
     try{ 
         const posts = await Post.find().sort({date: -1}); //NOTE the most recent first
@@ -113,7 +113,6 @@ router.delete('/:id',auth, async (req,res) => {
 
 //ANCHOR @route PUT api/posts/like/:id
 //ANCHOR Like a post 
-//ANCHOR 
 router.put('/like/:id', auth, async (req, res) => {
     try{
      const post = await Post.findById(req.params.id); 
