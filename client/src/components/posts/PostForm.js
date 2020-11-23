@@ -12,7 +12,7 @@ const PostForm = ({ addPost }) => {
             </div>
             <form class="form my-1" onSubmit={e => {
                 e.preventDefault();
-                addPost({text});
+                addPost({text});//NOTE Send inform of Object => {text: 'something....'}
                 setText('');
             }}>
             <textarea

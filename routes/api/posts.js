@@ -33,7 +33,7 @@ router.post('/',[auth,
     const newPost = new Post({
         text: req.body.text, 
         name : user.name, 
-        avartar: user.avartar,
+        avatar: user.avatar,
         user: req.user.id
     });
 
@@ -177,7 +177,7 @@ router.post('/comment/:id',[auth,
     const newComment = {
         text: req.body.text, 
         name : user.name, 
-        avartar: user.avartar,
+        avatar: user.avatar,
         user: req.user.id
     };
 
