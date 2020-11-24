@@ -1,0 +1,7 @@
+{
+    "mongoURI": "mongodb+srv://oxenearth55:096997619@devconnector.dzzye.mongodb.net/test?retryWrites=true&w=majority",
+    "jwtSecret": "mynameisToffee",
+    "githubClientId": "Iv1.62930c13c0b40bd6", 
+    "githubSecret": "d82461992511afe12eec1e1680b6f7bbc92c7062"
+    
+}

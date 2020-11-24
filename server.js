@@ -1,5 +1,6 @@
 const express = require('express');
 const connectDB = require('./config/db');
+const path = require('path')
 
 const app = express();
 
@@ -15,6 +16,15 @@ app.use('/api/auth', require('./routes/api/auth'));
 app.use('/api/profile', require('./routes/api/profiles'));
 app.use('/api/posts', require('./routes/api/posts'));
 
+// NOTE Serve static assets in production 
+if(process.env.NODE_ENV === 'production') {
+    //NOTE Set static folder 
+    app.use(express.static('client/build'));
+
+    app.get('*', (res, req) => {
+        res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+    })
+}
 
 
 //NOTE It will look at varaible name PORT in .env file 
